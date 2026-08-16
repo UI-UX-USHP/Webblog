@@ -83,7 +83,37 @@ rồi `nssm restart ushp-blog`.
 > Lưu ý: đảm bảo tài khoản chạy service có quyền ghi vào thư mục dự án (để ghi
 > `blog.db` và `public/uploads`).
 
-## 5. Tạo Site IIS + reverse proxy
+## 5A. Reverse proxy + SSL bằng Proxy Manager (GUI) — cách đang dùng
+
+Nếu bạn dùng **Nginx Proxy Manager / Proxy Manager có giao diện web** (vd
+`proxy.ovncr.vn`) thì **bỏ qua mục 5B (IIS) và mục 6 (win-acme)** — Proxy Manager
+lo cả reverse proxy lẫn SSL. Các bước:
+
+1. Đăng nhập Proxy Manager → **Hosts → Proxy Hosts → Add Proxy Host**.
+2. Tab **Details**:
+   - **Domain Names**: `ushp.name.vn`
+   - **Scheme**: `http`
+   - **Forward Hostname / IP**: IP nội bộ của VPS chạy blog.
+     - Nếu Proxy Manager chạy **cùng máy, KHÔNG trong Docker**: dùng `127.0.0.1`.
+     - Nếu Proxy Manager chạy **trong Docker**: **không** dùng `127.0.0.1` (đó là
+       chính container). Dùng IP LAN của host, hoặc `host.docker.internal`
+       (Docker Desktop trên Windows hỗ trợ tên này).
+   - **Forward Port**: `26105`
+   - Bật **Block Common Exploits** và **Websockets Support**.
+3. Tab **SSL**:
+   - **SSL Certificate** → **Request a new SSL Certificate**
+   - Bật **Force SSL** và **HTTP/2 Support**
+   - Đồng ý điều khoản Let's Encrypt → **Save**.
+4. Đảm bảo DNS `ushp.name.vn` (bản ghi A) trỏ về đúng IP mà Proxy Manager đang
+   nhận request (cùng ingress với các site khác của bạn).
+5. Mở `https://ushp.name.vn` → thấy blog, khóa xanh.
+
+> Với hướng này, cổng 26105 chỉ cần mở trong mạng nội bộ để Proxy Manager gọi tới;
+> không cần mở 26105 ra Internet.
+
+---
+
+## 5B. (Cách thay thế) Tạo Site IIS + reverse proxy
 
 1. IIS Manager → **Sites** → **Add Website**:
    - Site name: `ushp-blog`
