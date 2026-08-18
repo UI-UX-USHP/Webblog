@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import TiptapEditor from "@/components/editor/TiptapEditor";
+import Button from "@/components/ui/Button";
 import { savePost, type SavePostInput } from "@/actions/posts";
 
 type Category = { id: string; name: string };
@@ -80,7 +81,7 @@ export default function PostForm({ categories, initial }: Props) {
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="Tiêu đề bài viết"
-          className="w-full rounded-lg border border-neutral-200 bg-white px-4 py-3 text-xl font-semibold text-neutral-900 outline-none focus:border-neutral-900 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100"
+          className="w-full rounded-lg border border-border bg-surface px-4 py-3 text-xl font-semibold text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-ring"
         />
         <TiptapEditor value={contentHtml} onChange={setContentHtml} />
       </div>
@@ -88,18 +89,18 @@ export default function PostForm({ categories, initial }: Props) {
       {/* Cột phụ */}
       <aside className="space-y-5">
         {error && (
-          <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-950/40 dark:text-red-400">
+          <p className="rounded-lg bg-red-500/10 px-3 py-2 text-sm text-red-600 dark:text-red-400">
             {error}
           </p>
         )}
 
-        <div className="space-y-3 rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="space-y-3 rounded-xl border border-border bg-surface p-4">
           <div>
             <label className="mb-1 block text-sm font-medium">Chuyên mục</label>
             <select
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full rounded-lg border border-neutral-300 bg-white px-3 py-2 dark:border-neutral-700 dark:bg-neutral-800"
+              className="w-full rounded-lg border border-border bg-surface px-3 py-2 outline-none transition focus:border-primary focus:ring-2 focus:ring-ring"
             >
               <option value="">— Chưa phân loại —</option>
               {categories.map((c) => (
@@ -119,27 +120,27 @@ export default function PostForm({ categories, initial }: Props) {
               onChange={(e) => setExcerpt(e.target.value)}
               rows={3}
               placeholder="Để trống sẽ tự lấy từ nội dung"
-              className="w-full resize-none rounded-lg border border-neutral-300 bg-white px-3 py-2 text-sm dark:border-neutral-700 dark:bg-neutral-800"
+              className="w-full resize-none rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring"
             />
           </div>
         </div>
 
-        <div className="space-y-3 rounded-xl border border-neutral-200 bg-white p-4 dark:border-neutral-800 dark:bg-neutral-900">
+        <div className="space-y-3 rounded-xl border border-border bg-surface p-4">
           <label className="block text-sm font-medium">Ảnh bìa</label>
           {coverImage ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img
               src={coverImage}
               alt="cover"
-              className="aspect-video w-full rounded-lg object-cover"
+              className="aspect-video w-full rounded-lg border border-border object-cover"
             />
           ) : (
-            <div className="flex aspect-video w-full items-center justify-center rounded-lg bg-neutral-100 text-sm text-neutral-400 dark:bg-neutral-800">
+            <div className="flex aspect-video w-full items-center justify-center rounded-lg bg-surface-muted text-sm text-muted-foreground">
               Chưa có ảnh
             </div>
           )}
           <div className="flex gap-2">
-            <label className="flex-1 cursor-pointer rounded-lg border border-neutral-300 px-3 py-2 text-center text-sm hover:bg-neutral-100 dark:border-neutral-700 dark:hover:bg-neutral-800">
+            <label className="flex-1 cursor-pointer rounded-lg border border-border px-3 py-2 text-center text-sm transition hover:bg-surface-muted">
               {uploadingCover ? "Đang tải…" : "Chọn ảnh"}
               <input
                 type="file"
@@ -156,7 +157,7 @@ export default function PostForm({ categories, initial }: Props) {
               <button
                 type="button"
                 onClick={() => setCoverImage("")}
-                className="rounded-lg border border-neutral-300 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:border-neutral-700 dark:hover:bg-red-950/30"
+                className="rounded-lg border border-border px-3 py-2 text-sm text-red-600 transition hover:bg-red-500/10 dark:text-red-400"
               >
                 Xóa
               </button>
@@ -165,22 +166,21 @@ export default function PostForm({ categories, initial }: Props) {
         </div>
 
         <div className="flex flex-col gap-2">
-          <button
+          <Button
             type="button"
             disabled={isPending}
             onClick={() => submit("PUBLISHED")}
-            className="rounded-lg bg-neutral-900 px-4 py-2.5 font-medium text-white transition hover:bg-neutral-700 disabled:opacity-60 dark:bg-neutral-100 dark:text-neutral-900 dark:hover:bg-neutral-300"
           >
             {isPending ? "Đang lưu…" : "Xuất bản"}
-          </button>
-          <button
+          </Button>
+          <Button
             type="button"
+            variant="secondary"
             disabled={isPending}
             onClick={() => submit("DRAFT")}
-            className="rounded-lg border border-neutral-300 px-4 py-2.5 font-medium transition hover:bg-neutral-100 disabled:opacity-60 dark:border-neutral-700 dark:hover:bg-neutral-800"
           >
             Lưu nháp
-          </button>
+          </Button>
         </div>
       </aside>
     </div>

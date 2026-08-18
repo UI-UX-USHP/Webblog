@@ -17,17 +17,28 @@ export default async function BlogPage() {
   });
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
-      <h1 className="mb-8 text-3xl font-bold">Tất cả bài viết</h1>
-      {posts.length === 0 ? (
-        <p className="text-neutral-500">Chưa có bài viết nào.</p>
-      ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {posts.map((p) => (
-            <PostCard key={p.slug} post={p} />
-          ))}
-        </div>
-      )}
+    <div className="hero-glow">
+      <div className="mx-auto max-w-5xl px-4 py-14">
+        <header className="mb-10">
+          <h1 className="text-4xl font-bold tracking-tight sm:text-5xl">
+            Tất cả bài viết
+          </h1>
+          <p className="mt-3 text-lg text-muted-foreground">
+            Toàn bộ bài viết đã xuất bản trên weblog.
+          </p>
+        </header>
+        {posts.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-border p-10 text-center text-muted-foreground">
+            Chưa có bài viết nào.
+          </p>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {posts.map((p) => (
+              <PostCard key={p.slug} post={p} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

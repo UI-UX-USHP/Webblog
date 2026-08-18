@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { ExternalLink } from "lucide-react";
 import { auth } from "@/auth";
 import SignOutButton from "@/components/admin/SignOutButton";
+import AdminNav from "@/components/admin/AdminNav";
 
 export default async function PanelLayout({
   children,
@@ -11,42 +13,31 @@ export default async function PanelLayout({
   const session = await auth();
   if (!session?.user) redirect("/admin/login");
 
-  const nav = [
-    { href: "/admin", label: "Tổng quan" },
-    { href: "/admin/posts", label: "Bài viết" },
-    { href: "/admin/posts/new", label: "Viết bài mới" },
-    { href: "/admin/categories", label: "Chuyên mục" },
-  ];
-
   return (
-    <div className="flex min-h-screen bg-neutral-100 dark:bg-neutral-950">
-      <aside className="flex w-60 flex-col border-r border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
-        <div className="border-b border-neutral-200 px-5 py-4 dark:border-neutral-800">
-          <Link href="/admin" className="text-lg font-bold">
-            USHP Admin
+    <div className="flex min-h-screen bg-surface-muted">
+      <aside className="flex w-60 flex-col border-r border-border bg-surface">
+        <div className="border-b border-border px-5 py-4">
+          <Link href="/admin" className="flex items-center gap-2.5">
+            <span className="grid size-8 place-items-center rounded-lg bg-gradient-to-br from-[var(--accent-from)] to-[var(--accent-to)] text-sm font-bold text-white">
+              U
+            </span>
+            <span className="text-lg font-bold tracking-tight">Admin</span>
           </Link>
-          <p className="truncate text-xs text-neutral-500">
+          <p className="mt-2 truncate text-xs text-muted-foreground">
             {session.user.email}
           </p>
         </div>
-        <nav className="flex-1 space-y-1 p-3">
-          {nav.map((n) => (
-            <Link
-              key={n.href}
-              href={n.href}
-              className="block rounded-lg px-3 py-2 text-sm font-medium text-neutral-700 transition hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800"
-            >
-              {n.label}
-            </Link>
-          ))}
-        </nav>
-        <div className="border-t border-neutral-200 p-3 dark:border-neutral-800">
+
+        <AdminNav />
+
+        <div className="border-t border-border p-3">
           <Link
             href="/"
             target="_blank"
-            className="mb-2 block rounded-lg px-3 py-2 text-sm text-neutral-600 hover:bg-neutral-100 dark:text-neutral-400 dark:hover:bg-neutral-800"
+            className="mb-2 flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-muted-foreground transition hover:bg-surface-muted hover:text-foreground"
           >
-            ↗ Xem trang chủ
+            <ExternalLink className="size-4" />
+            Xem trang chủ
           </Link>
           <SignOutButton />
         </div>

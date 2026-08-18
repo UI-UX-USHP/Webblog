@@ -1,23 +1,68 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* ------------------------------------------------------------------ *
+ * Design tokens — "Modern Premium Tech"
+ * Signature accent: Indigo → Violet on a cool zinc neutral base.
+ * Dark mode is automatic via prefers-color-scheme.
+ * ------------------------------------------------------------------ */
 :root {
   --background: #ffffff;
-  --foreground: #171717;
-}
+  --surface: #ffffff;
+  --surface-muted: #fafafa;
+  --foreground: #18181b;
+  --muted-foreground: #71717a;
+  --border: #e4e4e7;
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --primary: #4f46e5; /* indigo-600 */
+  --primary-hover: #4338ca; /* indigo-700 */
+  --primary-foreground: #ffffff;
+  --accent-from: #6366f1; /* indigo-500 */
+  --accent-to: #8b5cf6; /* violet-500 */
+
+  --ring: rgb(99 102 241 / 0.45);
+  --radius: 0.75rem;
+  --shadow-soft: 0 4px 24px -8px rgb(79 70 229 / 0.14);
+  --shadow-lift: 0 12px 32px -12px rgb(79 70 229 / 0.28);
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #09090b;
+    --surface: #18181b;
+    --surface-muted: #111113;
+    --foreground: #fafafa;
+    --muted-foreground: #a1a1aa;
+    --border: #27272a;
+
+    --primary: #818cf8; /* indigo-400 */
+    --primary-hover: #a5b4fc; /* indigo-300 */
+    --primary-foreground: #0b0b12;
+    --accent-from: #818cf8;
+    --accent-to: #a78bfa;
+
+    --ring: rgb(129 140 248 / 0.5);
+    --shadow-soft: 0 4px 24px -8px rgb(0 0 0 / 0.6);
+    --shadow-lift: 0 12px 36px -12px rgb(0 0 0 / 0.7);
   }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-foreground: var(--foreground);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-border: var(--border);
+  --color-primary: var(--primary);
+  --color-primary-hover: var(--primary-hover);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-ring: var(--ring);
+
+  --radius-lg: var(--radius);
+
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
 }
 
 body {
@@ -26,7 +71,44 @@ body {
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
 
-/* Ảnh trong nội dung bài viết */
+/* Radial indigo→violet glow for hero backgrounds */
+.hero-glow {
+  position: relative;
+  isolation: isolate;
+}
+.hero-glow::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -20% -10% auto -10%;
+  height: 420px;
+  background:
+    radial-gradient(60% 60% at 20% 0%, rgb(99 102 241 / 0.16), transparent 70%),
+    radial-gradient(50% 50% at 85% 10%, rgb(139 92 246 / 0.14), transparent 70%);
+  pointer-events: none;
+}
+
+/* Accent gradient text helper */
+.text-gradient {
+  background-image: linear-gradient(
+    to right,
+    var(--accent-from),
+    var(--accent-to)
+  );
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* Long-form content polish */
 .prose img {
   border-radius: 0.5rem;
+}
+.prose :where(a):not(:where([class~="not-prose"] *)) {
+  color: var(--primary);
+  text-decoration: none;
+  font-weight: 500;
+}
+.prose :where(a):not(:where([class~="not-prose"] *)):hover {
+  text-decoration: underline;
 }

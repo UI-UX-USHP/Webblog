@@ -1,6 +1,10 @@
 import Link from "next/link";
+import { Plus } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 import DeletePostButton from "@/components/admin/DeletePostButton";
+import Badge from "@/components/ui/Badge";
+import Card from "@/components/ui/Card";
+import { buttonClasses } from "@/components/ui/Button";
 
 export default async function PostsListPage() {
   const posts = await prisma.post.findMany({
@@ -11,23 +15,24 @@ export default async function PostsListPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Bài viết</h1>
+        <h1 className="text-2xl font-bold tracking-tight">Bài viết</h1>
         <Link
           href="/admin/posts/new"
-          className="rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white hover:bg-neutral-700 dark:bg-neutral-100 dark:text-neutral-900"
+          className={buttonClasses({ variant: "primary", size: "md" })}
         >
-          + Viết bài mới
+          <Plus className="size-4" />
+          Viết bài mới
         </Link>
       </div>
 
-      <div className="overflow-x-auto rounded-xl border border-neutral-200 bg-white dark:border-neutral-800 dark:bg-neutral-900">
+      <Card className="overflow-x-auto">
         {posts.length === 0 ? (
-          <p className="p-6 text-sm text-neutral-500">
+          <p className="p-6 text-sm text-muted-foreground">
             Chưa có bài viết. Bấm “Viết bài mới” để bắt đầu.
           </p>
         ) : (
           <table className="w-full text-left text-sm">
-            <thead className="border-b border-neutral-200 text-neutral-500 dark:border-neutral-800">
+            <thead className="border-b border-border text-muted-foreground">
               <tr>
                 <th className="px-5 py-3 font-medium">Tiêu đề</th>
                 <th className="px-5 py-3 font-medium">Chuyên mục</th>
@@ -36,39 +41,35 @@ export default async function PostsListPage() {
                 <th className="px-5 py-3 font-medium">Thao tác</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-neutral-100 dark:divide-neutral-800">
+            <tbody className="divide-y divide-border">
               {posts.map((p) => (
-                <tr key={p.id} className="hover:bg-neutral-50 dark:hover:bg-neutral-800/40">
+                <tr key={p.id} className="transition hover:bg-surface-muted">
                   <td className="px-5 py-3">
                     <Link
                       href={`/admin/posts/${p.id}/edit`}
-                      className="font-medium hover:underline"
+                      className="font-medium transition hover:text-primary"
                     >
                       {p.title}
                     </Link>
                   </td>
-                  <td className="px-5 py-3 text-neutral-500">
+                  <td className="px-5 py-3 text-muted-foreground">
                     {p.category?.name ?? "—"}
                   </td>
                   <td className="px-5 py-3">
-                    <span
-                      className={`rounded-full px-2 py-0.5 text-xs ${
-                        p.status === "PUBLISHED"
-                          ? "bg-green-100 text-green-700 dark:bg-green-950 dark:text-green-400"
-                          : "bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-400"
-                      }`}
+                    <Badge
+                      tone={p.status === "PUBLISHED" ? "success" : "warning"}
                     >
                       {p.status === "PUBLISHED" ? "Đã đăng" : "Nháp"}
-                    </span>
+                    </Badge>
                   </td>
-                  <td className="px-5 py-3 text-neutral-500">
+                  <td className="px-5 py-3 text-muted-foreground">
                     {p.updatedAt.toLocaleDateString("vi-VN")}
                   </td>
                   <td className="px-5 py-3">
                     <div className="flex gap-3">
                       <Link
                         href={`/admin/posts/${p.id}/edit`}
-                        className="text-sm text-neutral-700 hover:underline dark:text-neutral-300"
+                        className="text-sm text-muted-foreground transition hover:text-primary"
                       >
                         Sửa
                       </Link>
@@ -80,7 +81,7 @@ export default async function PostsListPage() {
             </tbody>
           </table>
         )}
-      </div>
+      </Card>
     </div>
   );
 }

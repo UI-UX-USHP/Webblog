@@ -18,7 +18,7 @@ export default function DeletePostButton({ id }: { id: string }) {
           router.refresh();
         });
       }}
-      className="text-sm text-red-600 hover:underline disabled:opacity-50"
+      className="text-sm text-red-600 transition hover:underline disabled:opacity-50 dark:text-red-400"
     >
       {isPending ? "Đang xóa…" : "Xóa"}
     </button>

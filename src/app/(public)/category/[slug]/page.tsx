@@ -39,20 +39,28 @@ export default async function CategoryPage({
   if (!category) notFound();
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-10">
-      <p className="text-sm font-medium uppercase tracking-wide text-neutral-500">
-        Chuyên mục
-      </p>
-      <h1 className="mb-8 mt-1 text-3xl font-bold">{category.name}</h1>
-      {category.posts.length === 0 ? (
-        <p className="text-neutral-500">Chưa có bài viết trong chuyên mục này.</p>
-      ) : (
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {category.posts.map((p) => (
-            <PostCard key={p.slug} post={p} />
-          ))}
-        </div>
-      )}
+    <div className="hero-glow">
+      <div className="mx-auto max-w-5xl px-4 py-14">
+        <header className="mb-10">
+          <p className="text-sm font-medium uppercase tracking-wide text-primary">
+            Chuyên mục
+          </p>
+          <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">
+            {category.name}
+          </h1>
+        </header>
+        {category.posts.length === 0 ? (
+          <p className="rounded-xl border border-dashed border-border p-10 text-center text-muted-foreground">
+            Chưa có bài viết trong chuyên mục này.
+          </p>
+        ) : (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {category.posts.map((p) => (
+              <PostCard key={p.slug} post={p} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }

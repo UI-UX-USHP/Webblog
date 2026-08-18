@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft, Calendar, User } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import Badge from "@/components/ui/Badge";
+import { buttonClasses } from "@/components/ui/Button";
 
 export const dynamic = "force-dynamic";
 
@@ -48,32 +51,30 @@ export default async function PostPage({
     .catch(() => {});
 
   return (
-    <article className="mx-auto max-w-3xl px-4 py-10">
-      <header className="mb-8">
+    <article className="mx-auto max-w-3xl px-4 py-14">
+      <header className="hero-glow mb-8">
         {post.category && (
-          <Link
-            href={`/category/${post.category.slug}`}
-            className="text-sm font-medium uppercase tracking-wide text-neutral-500 hover:text-neutral-900 dark:hover:text-white"
-          >
-            {post.category.name}
+          <Link href={`/category/${post.category.slug}`}>
+            <Badge tone="accent">{post.category.name}</Badge>
           </Link>
         )}
-        <h1 className="mt-2 text-4xl font-bold leading-tight tracking-tight">
+        <h1 className="mt-4 text-4xl font-bold leading-tight tracking-tight sm:text-5xl">
           {post.title}
         </h1>
-        <div className="mt-4 flex items-center gap-3 text-sm text-neutral-500">
-          <span>{post.author.name}</span>
+        <div className="mt-5 flex flex-wrap items-center gap-4 text-sm text-muted-foreground">
+          <span className="flex items-center gap-1.5">
+            <User className="size-4" />
+            {post.author.name}
+          </span>
           {post.publishedAt && (
-            <>
-              <span>·</span>
-              <time>
-                {post.publishedAt.toLocaleDateString("vi-VN", {
-                  year: "numeric",
-                  month: "long",
-                  day: "numeric",
-                })}
-              </time>
-            </>
+            <time className="flex items-center gap-1.5">
+              <Calendar className="size-4" />
+              {post.publishedAt.toLocaleDateString("vi-VN", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </time>
           )}
         </div>
       </header>
@@ -83,18 +84,22 @@ export default async function PostPage({
         <img
           src={post.coverImage}
           alt={post.title}
-          className="mb-8 aspect-video w-full rounded-xl object-cover"
+          className="mb-10 aspect-video w-full rounded-2xl border border-border object-cover"
         />
       )}
 
       <div
-        className="prose prose-neutral max-w-none dark:prose-invert prose-img:rounded-lg prose-pre:bg-neutral-900"
+        className="prose prose-zinc max-w-none dark:prose-invert prose-headings:tracking-tight prose-img:rounded-lg prose-pre:bg-zinc-900 prose-pre:text-zinc-100 prose-blockquote:border-l-primary"
         dangerouslySetInnerHTML={{ __html: post.contentHtml }}
       />
 
-      <div className="mt-12 border-t border-neutral-200 pt-6 dark:border-neutral-800">
-        <Link href="/blog" className="text-sm text-neutral-500 hover:underline">
-          ← Quay lại danh sách bài viết
+      <div className="mt-14 border-t border-border pt-6">
+        <Link
+          href="/blog"
+          className={buttonClasses({ variant: "ghost", size: "md" })}
+        >
+          <ArrowLeft className="size-4" />
+          Quay lại danh sách bài viết
         </Link>
       </div>
     </article>
