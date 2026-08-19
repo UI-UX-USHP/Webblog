@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
+import { previewToken } from "@/lib/preview";
 import PostForm from "@/components/admin/PostForm";
 
 export default async function EditPostPage({
@@ -9,7 +10,10 @@ export default async function EditPostPage({
 }) {
   const { id } = await params;
   const [post, categories] = await Promise.all([
-    prisma.post.findUnique({ where: { id } }),
+    prisma.post.findUnique({
+      where: { id },
+      include: { tags: { include: { tag: { select: { name: true } } } } },
+    }),
     prisma.category.findMany({
       orderBy: { name: "asc" },
       select: { id: true, name: true },
@@ -26,11 +30,15 @@ export default async function EditPostPage({
         initial={{
           id: post.id,
           title: post.title,
+          slug: post.slug,
           categoryId: post.categoryId,
           status: post.status,
           contentHtml: post.contentHtml,
           coverImage: post.coverImage,
           excerpt: post.excerpt,
+          tagNames: post.tags.map((pt) => pt.tag.name),
+          publishedAt: post.publishedAt?.toISOString() ?? null,
+          previewToken: previewToken(post.id),
         }}
       />
     </div>

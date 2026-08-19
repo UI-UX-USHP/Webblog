@@ -1,15 +1,17 @@
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight } from "lucide-react";
 import { prisma } from "@/lib/prisma";
+import { publishedFilter } from "@/lib/post-queries";
 import PostCard from "@/components/public/PostCard";
 import Badge from "@/components/ui/Badge";
 import { buttonClasses } from "@/components/ui/Button";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 60;
 
 export default async function HomePage() {
   const posts = await prisma.post.findMany({
-    where: { status: "PUBLISHED" },
+    where: publishedFilter(),
     orderBy: { publishedAt: "desc" },
     take: 9,
     include: { category: { select: { name: true, slug: true } } },
@@ -54,12 +56,16 @@ export default async function HomePage() {
                   className="group grid gap-6 overflow-hidden rounded-2xl border border-border bg-surface transition duration-300 hover:shadow-[var(--shadow-lift)] md:grid-cols-2"
                 >
                   {featured.coverImage ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={featured.coverImage}
-                      alt={featured.title}
-                      className="h-full min-h-60 w-full object-cover transition duration-500 group-hover:scale-105"
-                    />
+                    <div className="relative min-h-60 md:h-full">
+                      <Image
+                        src={featured.coverImage}
+                        alt={featured.title}
+                        fill
+                        sizes="(max-width: 768px) 100vw, 50vw"
+                        priority
+                        className="object-cover transition duration-500 group-hover:scale-105"
+                      />
+                    </div>
                   ) : (
                     <div className="flex min-h-60 items-center justify-center bg-gradient-to-br from-[var(--accent-from)] to-[var(--accent-to)] text-3xl font-bold text-white/90">
                       USHP

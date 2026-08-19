@@ -1,6 +1,11 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+/* Cho phép chuyển sáng/tối thủ công: `dark:` bám theo [data-theme="dark"].
+ * Script khởi tạo ở root layout sẽ đặt data-theme = lựa chọn đã lưu, hoặc
+ * phân giải từ prefers-color-scheme, nên không nhấp nháy khi tải. */
+@custom-variant dark (&:where([data-theme="dark"], [data-theme="dark"] *));
+
 /* ------------------------------------------------------------------ *
  * Design tokens — "Modern Premium Tech"
  * Signature accent: Indigo → Violet on a cool zinc neutral base.
@@ -26,25 +31,23 @@
   --shadow-lift: 0 12px 32px -12px rgb(79 70 229 / 0.28);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #09090b;
-    --surface: #18181b;
-    --surface-muted: #111113;
-    --foreground: #fafafa;
-    --muted-foreground: #a1a1aa;
-    --border: #27272a;
+:root[data-theme="dark"] {
+  --background: #09090b;
+  --surface: #18181b;
+  --surface-muted: #111113;
+  --foreground: #fafafa;
+  --muted-foreground: #a1a1aa;
+  --border: #27272a;
 
-    --primary: #818cf8; /* indigo-400 */
-    --primary-hover: #a5b4fc; /* indigo-300 */
-    --primary-foreground: #0b0b12;
-    --accent-from: #818cf8;
-    --accent-to: #a78bfa;
+  --primary: #818cf8; /* indigo-400 */
+  --primary-hover: #a5b4fc; /* indigo-300 */
+  --primary-foreground: #0b0b12;
+  --accent-from: #818cf8;
+  --accent-to: #a78bfa;
 
-    --ring: rgb(129 140 248 / 0.5);
-    --shadow-soft: 0 4px 24px -8px rgb(0 0 0 / 0.6);
-    --shadow-lift: 0 12px 36px -12px rgb(0 0 0 / 0.7);
-  }
+  --ring: rgb(129 140 248 / 0.5);
+  --shadow-soft: 0 4px 24px -8px rgb(0 0 0 / 0.6);
+  --shadow-lift: 0 12px 36px -12px rgb(0 0 0 / 0.7);
 }
 
 @theme inline {
@@ -100,8 +103,71 @@ body {
   color: transparent;
 }
 
+/* Syntax highlighting (highlight.js) — bảng màu tối, dùng cho cả 2 theme
+ * vì khối code luôn nền tối (prose-pre:bg-zinc-900). */
+.hljs {
+  color: #e4e4e7;
+  background: transparent;
+}
+.hljs-comment,
+.hljs-quote {
+  color: #7c7c8a;
+  font-style: italic;
+}
+.hljs-keyword,
+.hljs-selector-tag,
+.hljs-built_in,
+.hljs-name,
+.hljs-tag {
+  color: #c792ea;
+}
+.hljs-string,
+.hljs-title,
+.hljs-section,
+.hljs-attribute,
+.hljs-literal,
+.hljs-template-tag,
+.hljs-template-variable,
+.hljs-type,
+.hljs-addition {
+  color: #c3e88d;
+}
+.hljs-number,
+.hljs-symbol,
+.hljs-bullet,
+.hljs-link,
+.hljs-meta,
+.hljs-selector-id,
+.hljs-selector-class {
+  color: #f78c6c;
+}
+.hljs-attr,
+.hljs-variable,
+.hljs-title.class_ {
+  color: #82aaff;
+}
+.hljs-title.function_ {
+  color: #82aaff;
+}
+.hljs-deletion {
+  color: #ff5370;
+}
+.hljs-emphasis {
+  font-style: italic;
+}
+.hljs-strong {
+  font-weight: 700;
+}
+
 /* Long-form content polish */
 .prose img {
+  border-radius: 0.5rem;
+}
+.prose iframe {
+  width: 100%;
+  max-width: 100%;
+  aspect-ratio: 16 / 9;
+  height: auto;
   border-radius: 0.5rem;
 }
 .prose :where(a):not(:where([class~="not-prose"] *)) {

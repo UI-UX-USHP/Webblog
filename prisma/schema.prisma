@@ -33,17 +33,19 @@ model Category {
 }
 
 model Post {
-  id          String     @id @default(cuid())
-  title       String
-  slug        String     @unique
-  excerpt     String     @default("")
-  contentHtml String     @default("")
-  coverImage  String?
-  status      PostStatus @default(DRAFT)
-  viewCount   Int        @default(0)
-  publishedAt DateTime?
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  id             String     @id @default(cuid())
+  title          String
+  slug           String     @unique
+  excerpt        String     @default("")
+  contentHtml    String     @default("")
+  coverImage     String?
+  status         PostStatus @default(DRAFT)
+  viewCount      Int        @default(0)
+  readingMinutes Int        @default(1) // ước lượng thời gian đọc, tính lúc lưu
+  featured       Boolean    @default(false) // ghim lên trang chủ
+  publishedAt    DateTime?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
   categoryId String?
   category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
@@ -51,10 +53,29 @@ model Post {
   authorId String
   author   User   @relation(fields: [authorId], references: [id], onDelete: Cascade)
 
-  tags PostTag[]
+  tags  PostTag[]
+  views PostView[]
 
   @@index([status, publishedAt])
   @@index([categoryId])
+}
+
+/// Gộp lượt xem theo ngày để vẽ biểu đồ thống kê.
+model PostView {
+  id     String @id @default(cuid())
+  postId String
+  post   Post   @relation(fields: [postId], references: [id], onDelete: Cascade)
+  date   String // "YYYY-MM-DD"
+  count  Int    @default(0)
+
+  @@unique([postId, date])
+  @@index([date])
+}
+
+/// Cấu hình key-value cho lớp Tích hợp (analytics, Giscus, script tùy chỉnh…).
+model SiteSetting {
+  key   String @id
+  value String @default("")
 }
 
 model Tag {

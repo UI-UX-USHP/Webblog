@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
 import MobileNav from "./MobileNav";
+import ThemeToggle from "./ThemeToggle";
 
 export default async function SiteHeader() {
   const categories = await prisma.category.findMany({
@@ -26,19 +27,21 @@ export default async function SiteHeader() {
           </span>
         </Link>
 
-        <nav className="hidden items-center gap-1 text-sm font-medium sm:flex">
-          {links.map((l) => (
-            <Link
-              key={l.href}
-              href={l.href}
-              className="rounded-lg px-3 py-2 text-muted-foreground transition hover:bg-surface-muted hover:text-foreground"
-            >
-              {l.label}
-            </Link>
-          ))}
-        </nav>
-
-        <MobileNav links={links} />
+        <div className="flex items-center gap-1">
+          <nav className="hidden items-center gap-1 text-sm font-medium sm:flex">
+            {links.map((l) => (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="rounded-lg px-3 py-2 text-muted-foreground transition hover:bg-surface-muted hover:text-foreground"
+              >
+                {l.label}
+              </Link>
+            ))}
+          </nav>
+          <ThemeToggle />
+          <MobileNav links={links} />
+        </div>
       </div>
     </header>
   );

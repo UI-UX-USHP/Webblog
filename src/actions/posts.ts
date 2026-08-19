@@ -6,6 +6,8 @@ import { prisma } from "@/lib/prisma";
 import { requireAdmin } from "@/lib/require-admin";
 import { uniquePostSlug } from "@/lib/slug";
 import { sanitizeHtml, htmlToExcerpt } from "@/lib/sanitize";
+import { readingMinutes } from "@/lib/content";
+import { syncPostTags } from "@/lib/tags";
 
 export type SavePostInput = {
   id?: string;
@@ -15,11 +17,14 @@ export type SavePostInput = {
   contentHtml: string;
   coverImage: string | null;
   excerpt?: string;
+  tagNames?: string[];
+  publishedAt?: string | null; // ISO; đặt tương lai để hẹn giờ đăng
 };
 
 function revalidatePublic(slug?: string) {
   revalidatePath("/");
   revalidatePath("/blog");
+  revalidatePath("/feed.xml");
   if (slug) revalidatePath(`/post/${slug}`);
 }
 
@@ -34,6 +39,8 @@ export async function savePost(input: SavePostInput): Promise<string> {
   const excerpt =
     (input.excerpt?.trim() || htmlToExcerpt(cleanHtml)) ?? "";
   const isPublished = input.status === "PUBLISHED";
+  const reading = readingMinutes(cleanHtml);
+  const chosenDate = input.publishedAt ? new Date(input.publishedAt) : null;
 
   if (input.id) {
     // Cập nhật
@@ -54,11 +61,13 @@ export async function savePost(input: SavePostInput): Promise<string> {
         coverImage: input.coverImage,
         categoryId: input.categoryId,
         status: input.status,
+        readingMinutes: reading,
         publishedAt: isPublished
-          ? (existing.publishedAt ?? new Date())
+          ? (chosenDate ?? existing.publishedAt ?? new Date())
           : null,
       },
     });
+    await syncPostTags(post.id, input.tagNames ?? []);
     revalidatePublic(post.slug);
     if (existing.slug !== post.slug) revalidatePath(`/post/${existing.slug}`);
     return post.slug;
@@ -75,10 +84,12 @@ export async function savePost(input: SavePostInput): Promise<string> {
       coverImage: input.coverImage,
       categoryId: input.categoryId,
       status: input.status,
-      publishedAt: isPublished ? new Date() : null,
+      readingMinutes: reading,
+      publishedAt: isPublished ? (chosenDate ?? new Date()) : null,
       authorId: session.user.id,
     },
   });
+  await syncPostTags(post.id, input.tagNames ?? []);
   revalidatePublic(post.slug);
   return post.slug;
 }
@@ -88,6 +99,37 @@ export async function deletePost(id: string): Promise<void> {
   await requireAdmin();
   const post = await prisma.post.delete({ where: { id } });
   revalidatePublic(post.slug);
+  revalidatePath("/admin/posts");
+}
+
+/** Thao tác hàng loạt trên nhiều bài viết cùng lúc. */
+export async function bulkPosts(
+  ids: string[],
+  action: "publish" | "draft" | "delete",
+): Promise<void> {
+  await requireAdmin();
+  if (ids.length === 0) return;
+
+  if (action === "delete") {
+    await prisma.post.deleteMany({ where: { id: { in: ids } } });
+  } else if (action === "publish") {
+    // Bài chưa từng đăng thì đặt thời gian đăng = bây giờ.
+    await prisma.post.updateMany({
+      where: { id: { in: ids }, publishedAt: null },
+      data: { publishedAt: new Date() },
+    });
+    await prisma.post.updateMany({
+      where: { id: { in: ids } },
+      data: { status: "PUBLISHED" },
+    });
+  } else {
+    await prisma.post.updateMany({
+      where: { id: { in: ids } },
+      data: { status: "DRAFT" },
+    });
+  }
+
+  revalidatePublic();
   revalidatePath("/admin/posts");
 }
 

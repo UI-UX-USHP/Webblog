@@ -7,6 +7,9 @@ import {
   FileText,
   PenSquare,
   FolderTree,
+  ImageIcon,
+  BarChart3,
+  Plug,
 } from "lucide-react";
 
 const nav = [
@@ -14,6 +17,9 @@ const nav = [
   { href: "/admin/posts", label: "Bài viết", icon: FileText, exact: true },
   { href: "/admin/posts/new", label: "Viết bài mới", icon: PenSquare },
   { href: "/admin/categories", label: "Chuyên mục", icon: FolderTree },
+  { href: "/admin/media", label: "Thư viện", icon: ImageIcon },
+  { href: "/admin/analytics", label: "Thống kê", icon: BarChart3 },
+  { href: "/admin/integrations", label: "Tích hợp", icon: Plug },
 ];
 
 export default function AdminNav() {

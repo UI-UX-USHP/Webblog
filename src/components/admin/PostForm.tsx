@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import { X, ExternalLink, Download } from "lucide-react";
 import TiptapEditor from "@/components/editor/TiptapEditor";
 import Button from "@/components/ui/Button";
 import { savePost, type SavePostInput } from "@/actions/posts";
@@ -13,13 +14,25 @@ type Props = {
   initial?: {
     id: string;
     title: string;
+    slug?: string;
     categoryId: string | null;
     status: "DRAFT" | "PUBLISHED";
     contentHtml: string;
     coverImage: string | null;
     excerpt: string;
+    tagNames?: string[];
+    publishedAt?: string | null;
+    previewToken?: string;
   };
 };
+
+/** ISO → "YYYY-MM-DDTHH:mm" theo giờ địa phương cho input datetime-local. */
+function toLocalInput(iso: string | null | undefined): string {
+  if (!iso) return "";
+  const d = new Date(iso);
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+}
 
 export default function PostForm({ categories, initial }: Props) {
   const router = useRouter();
@@ -31,7 +44,34 @@ export default function PostForm({ categories, initial }: Props) {
   const [contentHtml, setContentHtml] = useState(initial?.contentHtml ?? "");
   const [coverImage, setCoverImage] = useState(initial?.coverImage ?? "");
   const [excerpt, setExcerpt] = useState(initial?.excerpt ?? "");
+  const [tags, setTags] = useState<string[]>(initial?.tagNames ?? []);
+  const [tagInput, setTagInput] = useState("");
+  const [publishAt, setPublishAt] = useState(toLocalInput(initial?.publishedAt));
   const [uploadingCover, setUploadingCover] = useState(false);
+
+  const previewUrl =
+    initial?.slug && initial?.previewToken
+      ? `/preview/${initial.slug}?token=${initial.previewToken}`
+      : null;
+
+  function addTag(raw: string) {
+    const parts = raw
+      .split(",")
+      .map((t) => t.trim())
+      .filter(Boolean);
+    if (parts.length === 0) return;
+    setTags((prev) => [...new Set([...prev, ...parts])].slice(0, 20));
+    setTagInput("");
+  }
+
+  function onTagKeyDown(e: React.KeyboardEvent<HTMLInputElement>) {
+    if (e.key === "Enter" || e.key === ",") {
+      e.preventDefault();
+      addTag(tagInput);
+    } else if (e.key === "Backspace" && !tagInput && tags.length) {
+      setTags((prev) => prev.slice(0, -1));
+    }
+  }
 
   function submit(status: "DRAFT" | "PUBLISHED") {
     setError("");
@@ -47,6 +87,8 @@ export default function PostForm({ categories, initial }: Props) {
       contentHtml,
       coverImage: coverImage || null,
       excerpt,
+      tagNames: tags,
+      publishedAt: publishAt ? new Date(publishAt).toISOString() : null,
     };
     startTransition(async () => {
       try {
@@ -123,6 +165,38 @@ export default function PostForm({ categories, initial }: Props) {
               className="w-full resize-none rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring"
             />
           </div>
+
+          <div>
+            <label className="mb-1 block text-sm font-medium">Thẻ (tags)</label>
+            {tags.length > 0 && (
+              <div className="mb-2 flex flex-wrap gap-1.5">
+                {tags.map((t) => (
+                  <span
+                    key={t}
+                    className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-medium text-primary ring-1 ring-inset ring-primary/20"
+                  >
+                    {t}
+                    <button
+                      type="button"
+                      onClick={() => setTags((prev) => prev.filter((x) => x !== t))}
+                      className="transition hover:text-primary-hover"
+                      aria-label={`Xóa thẻ ${t}`}
+                    >
+                      <X className="size-3" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            )}
+            <input
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={onTagKeyDown}
+              onBlur={() => addTag(tagInput)}
+              placeholder="Nhập rồi Enter hoặc dấu phẩy"
+              className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring"
+            />
+          </div>
         </div>
 
         <div className="space-y-3 rounded-xl border border-border bg-surface p-4">
@@ -163,6 +237,43 @@ export default function PostForm({ categories, initial }: Props) {
               </button>
             )}
           </div>
+        </div>
+
+        <div className="space-y-3 rounded-xl border border-border bg-surface p-4">
+          <div>
+            <label className="mb-1 block text-sm font-medium">
+              Thời gian đăng
+            </label>
+            <input
+              type="datetime-local"
+              value={publishAt}
+              onChange={(e) => setPublishAt(e.target.value)}
+              className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-ring"
+            />
+            <p className="mt-1 text-xs text-muted-foreground">
+              Đặt tương lai = hẹn giờ đăng. Trống = đăng ngay khi bấm Xuất bản.
+            </p>
+          </div>
+          {previewUrl && (
+            <a
+              href={previewUrl}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-center gap-1.5 text-sm text-primary hover:underline"
+            >
+              <ExternalLink className="size-4" />
+              Xem trước (link chia sẻ được)
+            </a>
+          )}
+          {initial?.id && (
+            <a
+              href={`/api/posts/${initial.id}/markdown`}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground"
+            >
+              <Download className="size-4" />
+              Xuất Markdown
+            </a>
+          )}
         </div>
 
         <div className="flex flex-col gap-2">

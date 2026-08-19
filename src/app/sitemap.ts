@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { prisma } from "@/lib/prisma";
+import { publishedFilter } from "@/lib/post-queries";
 
 const BASE = process.env.AUTH_URL ?? "http://localhost:26105";
 
@@ -8,7 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [posts, categories] = await Promise.all([
     prisma.post.findMany({
-      where: { status: "PUBLISHED" },
+      where: publishedFilter(),
       select: { slug: true, updatedAt: true },
     }),
     prisma.category.findMany({ select: { slug: true } }),

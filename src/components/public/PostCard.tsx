@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { Calendar } from "lucide-react";
+import Image from "next/image";
+import { Calendar, Clock } from "lucide-react";
 import Badge from "@/components/ui/Badge";
 
 type PostCardData = {
@@ -8,22 +9,27 @@ type PostCardData = {
   excerpt: string;
   coverImage: string | null;
   publishedAt: Date | null;
+  readingMinutes?: number;
   category: { name: string; slug: string } | null;
 };
 
 export default function PostCard({ post }: { post: PostCardData }) {
   return (
     <article className="group overflow-hidden rounded-xl border border-border bg-surface transition duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-lift)]">
-      <Link href={`/post/${post.slug}`} className="block overflow-hidden">
+      <Link
+        href={`/post/${post.slug}`}
+        className="relative block aspect-video overflow-hidden"
+      >
         {post.coverImage ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={post.coverImage}
             alt={post.title}
-            className="aspect-video w-full object-cover transition duration-500 group-hover:scale-105"
+            fill
+            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+            className="object-cover transition duration-500 group-hover:scale-105"
           />
         ) : (
-          <div className="flex aspect-video w-full items-center justify-center bg-gradient-to-br from-[var(--accent-from)] to-[var(--accent-to)] text-2xl font-bold text-white/90">
+          <div className="flex size-full items-center justify-center bg-gradient-to-br from-[var(--accent-from)] to-[var(--accent-to)] text-2xl font-bold text-white/90">
             USHP
           </div>
         )}
@@ -45,16 +51,24 @@ export default function PostCard({ post }: { post: PostCardData }) {
         <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
           {post.excerpt}
         </p>
-        {post.publishedAt && (
-          <time className="mt-4 flex items-center gap-1.5 text-xs text-muted-foreground">
-            <Calendar className="size-3.5" />
-            {post.publishedAt.toLocaleDateString("vi-VN", {
-              year: "numeric",
-              month: "long",
-              day: "numeric",
-            })}
-          </time>
-        )}
+        <div className="mt-4 flex items-center gap-3 text-xs text-muted-foreground">
+          {post.publishedAt && (
+            <time className="flex items-center gap-1.5">
+              <Calendar className="size-3.5" />
+              {post.publishedAt.toLocaleDateString("vi-VN", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+              })}
+            </time>
+          )}
+          {post.readingMinutes ? (
+            <span className="flex items-center gap-1.5">
+              <Clock className="size-3.5" />
+              {post.readingMinutes} phút đọc
+            </span>
+          ) : null}
+        </div>
       </div>
     </article>
   );
