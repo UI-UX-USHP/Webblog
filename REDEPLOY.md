@@ -42,9 +42,11 @@ Tùy nội dung thay đổi, chạy thêm:
 
 | Bạn đã thay đổi gì? | Lệnh cần chạy thêm |
 |---|---|
-| Thêm/bớt thư viện (`package.json` đổi) | `npm ci` |
+| Thêm/bớt thư viện (`package.json` đổi) | `nssm stop ushp-blog` **trước**, rồi `npm ci` (xem ⚠️ bên dưới) |
 | Sửa `prisma/schema.prisma` (đổi cấu trúc DB) | `npx prisma migrate deploy` |
 | Chỉ sửa code thường (page, component…) | *(không cần lệnh nào thêm)* |
+
+> ⚠️ **Khi chạy `npm ci` phải tắt service trước** (`nssm stop ushp-blog`). App đang chạy giữ file engine Prisma `node_modules\.prisma\client\query_engine-windows.dll.node`, nên `npm ci` (xóa & cài lại `node_modules`) sẽ báo `EPERM: unlink`. Tắt service → nhả file → cài được. Cuối cùng `nssm start ushp-blog` để chạy lại.
 
 Sau đó **luôn luôn** build lại và restart service:
 
@@ -62,9 +64,10 @@ Copy cả khối, chạy trên VPS:
 cd C:\apps\ushp-blog && git pull && npm run build && nssm restart ushp-blog
 ```
 
-### Lệnh đầy đủ (khi đổi cả thư viện + schema)
+### Lệnh đầy đủ (khi đổi thư viện và/hoặc schema)
+Có `nssm stop` **trước** `npm ci` (bắt buộc — xem ⚠️ ở trên). Trang sẽ tạm down đến bước `nssm start` ở cuối:
 ```bash
-cd C:\apps\ushp-blog && git pull && npm ci && npx prisma migrate deploy && npm run build && nssm restart ushp-blog
+cd C:\apps\ushp-blog && git pull && nssm stop ushp-blog && npm ci && npx prisma migrate deploy && npm run build && nssm start ushp-blog
 ```
 
 ---
@@ -112,6 +115,20 @@ Nếu vẫn kẹt, tìm & tắt tiến trình chiếm cổng:
 netstat -ano | findstr :26105
 ```
 → lấy PID ở cột cuối → `taskkill /PID <PID> /F` (đừng tắt nhầm PID của chính service).
+
+### `npm ci` báo `EPERM: unlink ...query_engine-windows.dll.node`
+App đang chạy giữ file engine Prisma. Tắt service trước rồi cài lại:
+```bash
+nssm stop ushp-blog && npm ci && npx prisma migrate deploy && npm run build && nssm start ushp-blog
+```
+Nếu vẫn kẹt (do antivirus): `nssm stop ushp-blog` → `rmdir /s /q node_modules` → chạy lại khối trên.
+> `npm warn EBADENGINE` (Node 22.20 vs yêu cầu 22.22 của dompurify/jsdom) chỉ là cảnh báo, **không chặn**.
+
+### `git pull` hỏi `Unlink of ...pack-*.idx failed. Should I try again? (y/n)`
+Bước auto-gc của Git kẹt file (thường do antivirus), **vô hại** — code vẫn kéo về. Gõ `n`. Tắt hẳn cho lần sau (chạy 1 lần):
+```bash
+git config gc.auto 0
+```
 
 ---
 
